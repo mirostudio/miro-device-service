@@ -1,0 +1,23 @@
+{
+  "name": "miro-device-service",
+  "version": "1.0.0",
+  "description": "Node based backed service for Raspberry-Pi device",
+  "main": "index1.ts",
+  "scripts": {
+    "dev": "NODE_ENV=development tsnd --respawn src/index.ts",
+    "build": "tsc",
+    "test": "jest --forceExit"
+  },
+  "keywords": [],
+  "author": "Avik Paul <avikpauldev@gmail.com>",
+  "license": "UNLICENSED",
+  "private": "true",
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "fastify": "^4.27.0"
+  }
+}

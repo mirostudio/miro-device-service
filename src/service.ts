@@ -1,39 +1,40 @@
-/*
-import { FastifyInstance, fastify } from 'fastify'
+import { FastifyError, FastifyInstance, fastify } from 'fastify'
+import { createError } from '@fastify/error'
 
-let server: FastifyInstance = fastify()
+const OnReadyError = createError('ON_READY_FAIL', 'Error in onReady')
 
-function ExecuteAsServiceApp() {
-  server = fastify()
+function StartService() {
+  const service: FastifyInstance = fastify()
 
-  server.get('/ping', async (request, reply) => {
-    return 'pong\n'
-  })
-
-  server.addHook('onReady', function (done: Function) {
-    // Some code
-    console.log('In onReady ..')
-    const err: Error | null = null;
+  service.addHook('onReady', function (done: (err?: FastifyError) => void) {
     try {
-      setInterval(() => {
-        console.log('____ server hook !');
-    }, 5000)
-  
+      serviceOnReady();
+      done()
     } catch (e) {
-      console.error('Caught: ' + e)
-      console.error(e)
+      done(new OnReadyError())
     }
-    done(err)
   })
 
-  server.listen({ port: 3000 }, function (err, address) {
-    if (err) {
-      console.error(err)
-      process.exit(1)
-    }
-    console.log(`Server listening at -  ${address}`)
-  })
+  const listenLoop = () => {
+    service.listen({ port: 3000 }, function (err, address) {
+      if (err) {
+        console.error(err)
+        process.exit(1)
+      }
+      console.log(`Server listening at -  ${address}`)
+    })
+  }
+
+  return {
+    service,
+    listen() { listenLoop() },
+  }
 }
 
-export { ExecuteAsServiceApp }
-*/
+function serviceOnReady() {
+  setInterval(() => {
+      console.log('____ server hook !');
+  }, 25000)
+}
+
+export { StartService }

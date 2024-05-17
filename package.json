@@ -2,7 +2,7 @@
   "name": "miro-device-service",
   "version": "1.0.0",
   "description": "Node based backed service for Raspberry-Pi device",
-  "main": "index1.ts",
+  "main": "index.ts",
   "scripts": {
     "dev": "NODE_ENV=development tsnd --respawn src/index.ts",
     "build": "tsc",

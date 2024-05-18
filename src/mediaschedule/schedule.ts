@@ -26,7 +26,6 @@ interface ScheduleEntry {
 
 class Schedule {
   private readonly entries: Array<ScheduleEntry> = [];
-  private lastUpdated: number;
 
   public currentEntries() : Array<ScheduleEntry> {
     return this.entries;

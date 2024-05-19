@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import { TaskRunner } from "../threads/taskrunner"
 import { ScheduleEntry } from "./schedule";
 
@@ -9,38 +11,45 @@ interface ScheduleMakerPayload {
   msg: string
 }
 
+type MediaEntry = {
+  id: string;
+  dur: number;
+};
+
+const kMediaList: Array<MediaEntry> = [
+  { id: "video01.mp4", dur: 10},
+  { id: "video02.mp4", dur: 20},
+  { id: "video03.mp4", dur: 30},
+  { id: "video04.mp4", dur: 10},
+  { id: "videoA4.mp4", dur: 20},
+  { id: "videoB3.mp4", dur: 20},
+  { id: "video0C.mp4", dur: 10},
+];
+
+
 class ScheduleMaker extends TaskRunner<ScheduleMakerPayload> {
   private generator: Function;
 
   constructor({ path } : InitArgs) {
     super("ScheduleMaker")
     console.log("@Init path = " + path);
-    this.generator = nextEntriesGen();
+    this.generator = nextEntriesGen(kMediaList);
   }
 
   public async runAsync(args: ScheduleMakerPayload) {
-    const entries = this.generator();
     console.log('ScheduleMaker run $$$$$ ... ' + args.msg);
+    const entries = this.generator();
+    global.aaaa = "prop-aaaa";
+    global.bbbb = this;
+    if (entries.length === 0) {
+      return;
+    }
     console.log(entries);
   }
 }
 
-function nextEntriesGen() {
-  type MediaEntry = {
-    id: string;
-    dur: number;
-  };
-
-  const mediaList: Array<MediaEntry> = [
-    { id: "video01.mp4", dur: 10},
-    { id: "video02.mp4", dur: 20},
-    { id: "video03.mp4", dur: 30},
-    { id: "video04.mp4", dur: 10},
-    { id: "videoA4.mp4", dur: 20},
-    { id: "videoB3.mp4", dur: 20},
-    { id: "video0C.mp4", dur: 10},
-  ];
-
+function nextEntriesGen(fixedMediaList: Array<MediaEntry>) {
+  const mediaList: Array<MediaEntry> = [...fixedMediaList];
   const nextMediaToPlay = () => {
     const media = mediaList.shift() as MediaEntry;
     if (!media) {
@@ -77,21 +86,69 @@ function nextEntriesGen() {
   let lastBucket = 0;
 
   return () => {
-    const secNow = (new Date()).getTime() / 1000;
-    const bucketNow = ((secNow + bucketSizeSec + bufferSecs) / bucketSizeSec)|0;
-    const startBucket = Math.max(lastBucket, bucketNow * bucketSizeSec);
-    const endBucket = (bucketNow + 2) * bucketSizeSec;
+    const secNow = ((new Date()).getTime() / 1000 + bufferSecs)|0;
+    const bucketNow = ((secNow + bucketSizeSec) / bucketSizeSec)|0;
     const allEntries: ScheduleEntry[] = [];
-    if (startBucket >= endBucket) {
+    console.log({secNow, bucketNow, lastBucket});
+    if (bucketNow < lastBucket) {
       return allEntries;
     }
+    const startBucket = Math.max(lastBucket, bucketNow);
+    const endBucket = startBucket + 2;
+    console.log({startBucket, endBucket});
     for (let bucket = startBucket; bucket < endBucket; ++bucket) {
       const bucketEntries = entriesInBucketFn(bucket);
       allEntries.push(...bucketEntries);
     }
     lastBucket = endBucket;
+    const entriesByBuckets = SplitScheduleByBucket(60, allEntries);
+    console.log(entriesByBuckets);
+    for (const key in entriesByBuckets) {
+      console.log("Key = " + key);
+      MergeBucketScheduleInFile(Number.parseInt(key), entriesByBuckets[key]);
+    }
+    if (false) {
+      SaveScheduleToDisk(allEntries);
+    }
     return allEntries;
   };
+}
+
+function SplitScheduleByBucket(bucketSizeSec: number, schedule: Array<ScheduleEntry>) {
+  const result = {};
+  schedule.forEach((entry: ScheduleEntry) => {
+    const startBucket = (entry.start / bucketSizeSec)|0;
+    const endBucket = ((entry.end - 0.1) / bucketSizeSec)|0;
+    if (startBucket !== endBucket) {
+      console.error("Schedule entry crosses bucket border: " + JSON.stringify(entry));
+      return;
+    }
+    if (!result[startBucket]) {
+      result[startBucket] = [];
+    }
+    result[startBucket].push(entry);
+  });
+  return result;
+}
+
+function MergeBucketScheduleInFile(bucket: number, schedule: Array<ScheduleEntry>) {
+  const filePath = path.join("./data", `bucket-${bucket}.json`);
+  if (fs.existsSync(filePath)) {
+    let content = fs.readFileSync(filePath).toString();
+    const entries = JSON.parse(content) as Array<ScheduleEntry>;
+    entries.push(...schedule);
+    content = JSON.stringify(schedule);
+    fs.writeFileSync(filePath, content, { flag: 'w' });
+  } else {
+    const content = JSON.stringify(schedule);
+    fs.writeFileSync(filePath, content);
+  }
+}
+
+function SaveScheduleToDisk(schedule: Array<ScheduleEntry>) {
+  const content = JSON.stringify(schedule);
+  const filePath = path.join("./data", "schedule.json");
+  fs.writeFileSync(filePath, content);
 }
 
 function _shuffleArray(array: any[]) {

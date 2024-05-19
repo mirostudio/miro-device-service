@@ -82,4 +82,4 @@ function _overlapEntries(
   return (entryB.start < entryA.end && entryA.start < entryB.end)
 }
 
-export { type ScheduleEntry }
+export { type ScheduleEntry, Schedule }

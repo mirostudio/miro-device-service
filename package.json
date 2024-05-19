@@ -4,7 +4,7 @@
   "description": "Node based backed service for Raspberry-Pi device",
   "main": "index.ts",
   "scripts": {
-    "dev": "NODE_ENV=development tsnd --respawn src/index.ts",
+    "dev": "NODE_ENV=development tsnd --watch ./src/ --respawn src/index.ts",
     "build": "tsc",
     "test": "jest --forceExit"
   },

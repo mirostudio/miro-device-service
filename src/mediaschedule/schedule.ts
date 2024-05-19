@@ -81,3 +81,5 @@ function _overlapEntries(
   entryB: {start: number, end: number}) : boolean {
   return (entryB.start < entryA.end && entryA.start < entryB.end)
 }
+
+export { type ScheduleEntry }

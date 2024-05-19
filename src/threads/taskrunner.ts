@@ -5,8 +5,10 @@ class TaskRunner<T> {
     this.name = name
   }
 
-  run(args: T) {
+  // @ts-ignore: no-unused-vars
+  async runAsync(args: T) {
     console.log("running task --- ")
+
   }
 }
 

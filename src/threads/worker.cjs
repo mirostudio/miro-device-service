@@ -17,6 +17,6 @@ if (!(appWorker instanceof TaskRunner)) {
   throw new Error('worker not instanceof TaskRunner')
 }
 
-parentPort.on('message', (payload) => {
-  appWorker.run(payload)
+parentPort.on('message', async (payload) => {
+  await appWorker.runAsync(payload)
 });

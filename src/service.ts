@@ -1,10 +1,10 @@
 import { FastifyError, FastifyInstance, fastify } from 'fastify'
-import { createError } from '@fastify/error'
+import { createError } from '@fastify/error';
 
-const OnReadyError = createError('ON_READY_FAIL', 'Error in onReady')
+const OnReadyError = createError('ON_READY_FAIL', 'Error in onReady');
 
 function StartService() {
-  const service: FastifyInstance = fastify()
+  const service: FastifyInstance = fastify();
 
   service.addHook('onReady', function (done: (err?: FastifyError) => void) {
     try {
@@ -13,7 +13,7 @@ function StartService() {
     } catch (e) {
       done(new OnReadyError())
     }
-  })
+  });
 
   const listenLoop = () => {
     service.listen({ port: 3000 }, function (err, address) {
@@ -23,12 +23,12 @@ function StartService() {
       }
       console.log(`Server listening at -  ${address}`)
     })
-  }
+  };
 
   return {
     service,
     listen() { listenLoop() },
-  }
+  };
 }
 
 function serviceOnReady() {

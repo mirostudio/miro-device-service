@@ -7,12 +7,12 @@ import WebSocket from 'ws';
 
 const fileExt = process.env.NODE_ENV === 'production' ? '.js' : '.ts';
 
-const src = path.join(__dirname, `./mediaschedule/schedulemaker${fileExt}`)
-const taskWorker = CreateTaskWorker(src)
+const src = path.join(__dirname, `./mediaschedule/schedulemaker${fileExt}`);
+const taskWorker = CreateTaskWorker(src);
 
-const service = StartService()
+const service = StartService();
 
-flags.dump()
+flags.dump();
 
 let counter = 1
 const intervalDurationMs = flags.get("schedule_updater_delay_sec") as number * 1000

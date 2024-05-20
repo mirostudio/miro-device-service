@@ -21,19 +21,15 @@ setInterval(() => {
   ++counter;
 }, intervalDurationMs)
 
-console.log('Before listen ..')
 service.listen()
-console.log('After listen ..')
-
-
 
 const wsClient = new WebSocket.WebSocket("ws://localhost:3001");
 console.log("created wsServer .....");
 wsClient.on('open', () => {
-  console.log("Opened, sending client -> server ! ========= 🐤🐤🐤🐤🐤🐤🐤🐤🐤");
-  wsClient.send("test msg - 🐇🐇🐇🐇");
-  wsClient.send("test msg - 🐓🐓🐓🐓");
-  wsClient.send("test msg - 🐤🐤🐤🐤🐤");
+  console.log("🐤 client opened !");
+  wsClient.send("🌼 🌼 🌼 Client's test msg 1");
+  wsClient.send("🌼 🌼 🌼 Client's test msg 2");
+  wsClient.send("🌼 🌼 🌼 Client's test msg 3");
 });
 wsClient.on("close", (code: number) => {
   console.error("Closed , code: " + code);
@@ -44,9 +40,6 @@ wsClient.on("error", (error: Error) => {
 wsClient.on("message", (data: WebSocket.RawData) => {
   const message = data.toString('utf8');
   console.log(message);
-});
-wsClient.on("ping", (_data: Buffer) => {
-  console.error("Ping from server ..");
 });
 wsClient.on("pong", (_data: Buffer) => {
   console.error("Pong from server ..");
